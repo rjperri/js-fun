@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blackjack Trainer</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #111;
+    color: white;
+    margin: 0;
+    padding: 20px;
+}
+
+.card {
+    font-size: 28px;
+    margin: 15px 0;
+}
+
+button {
+    width: 100%;
+    padding: 18px;
+    margin: 6px 0;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #2c2c2c;
+    color: white;
+}
+
+button:active {
+    background: #555;
+}
+
+.correct { color: #4caf50; }
+.wrong { color: #f44336; }
+
+.score {
+    margin-top: 15px;
+    font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Blackjack Strategy Trainer</h2>
+
+<div id="modeSelect">
+    <p>Select Mode</p>
+    <button onclick="setMode('ALL')">All Hands</button>
+    <button onclick="setMode('PAIRS')">Splits Only</button>
+    <button onclick="setMode('SOFT')">Soft Hands</button>
+    <button onclick="setMode('HARD')">Hard Hands (Weighted)</button>
+</div>
+
+<div id="game" style="display:none">
+
+<div class="card" id="player"></div>
+<div class="card" id="dealer"></div>
+
+<div id="buttons">
+<button onclick="answer('H')">Hit</button>
+<button onclick="answer('S')">Stand</button>
+<button onclick="answer('D')">Double</button>
+<button onclick="answer('P')">Split</button>
+<button onclick="answer('R')">Surrender</button>
+</div>
+
+<div id="result"></div>
+<div class="score" id="score"></div>
+
+</div>
+
+<script>
+
+const ACTIONS = {
+H:"Hit", S:"Stand", D:"Double", P:"Split", R:"Surrender"
+};
+
+let mode="ALL";
+let correct=0;
+let total=0;
+let scenario=null;
+let mistakeQueue=[];
+
+/* ---------- Card Logic ---------- */
+
+function drawCard(){
+const cards=[2,3,4,5,6,7,8,9,10,10,10,10,11];
+return cards[Math.floor(Math.random()*cards.length)];
+}
+
+function format(card){
+return card===11?"A":card;
+}
+
+function evaluate(c1,c2){
+let total=c1+c2;
+let soft=false;
+
+if((c1===11||c2===11)&&total<=21) soft=true;
+if(total===22){ total=12; soft=true;}
+
+return {total,isSoft:soft,isPair:c1===c2};
+}
+
+/* ---------- Scenario ---------- */
+
+function weightedHard(){
+const tough=[
+[10,6],[9,7],[10,5],[9,6],[10,2],[8,4],[7,5],[10,3],[9,5]
+];
+const p=tough[Math.floor(Math.random()*tough.length)];
+const dealer=drawCard();
+return {card1:p[0],card2:p[1],dealer,...evaluate(p[0],p[1])};
+}
+
+function randomScenario(){
+const c1=drawCard();
+const c2=drawCard();
+const d=drawCard();
+return {card1:c1,card2:c2,dealer:d,...evaluate(c1,c2)};
+}
+
+function getScenario(){
+
+if(mistakeQueue.length && Math.random()<0.3)
+return mistakeQueue.shift();
+
+while(true){
+
+let s;
+
+if(mode==="HARD" && Math.random()<0.6)
+s=weightedHard();
+else
+s=randomScenario();
+
+if(mode==="ALL") return s;
+if(mode==="PAIRS" && s.isPair) return s;
+if(mode==="SOFT" && s.isSoft && !s.isPair) return s;
+if(mode==="HARD" && !s.isSoft && !s.isPair) return s;
+}
+}
+
+/* ---------- Basic Strategy ---------- */
+
+function strategy(s){
+
+const d=s.dealer;
+
+if(s.isPair){
+switch(s.card1){
+case 11: return "P";
+case 8: return "P";
+case 10: return "S";
+case 9: return [2,3,4,5,6,8,9].includes(d)?"P":"S";
+case 7: return d<=7?"P":"H";
+case 6: return d<=6?"P":"H";
+case 4: return [5,6].includes(d)?"P":"H";
+case 3:
+case 2: return d<=7?"P":"H";
+}
+}
+
+if(s.isSoft){
+switch(s.total){
+case 20:
+case 19: return "S";
+case 18:
+if([3,4,5,6].includes(d)) return "D";
+if([2,7,8].includes(d)) return "S";
+return "H";
+case 17: return [3,4,5,6].includes(d)?"D":"H";
+case 16:
+case 15: return [4,5,6].includes(d)?"D":"H";
+case 14:
+case 13: return [5,6].includes(d)?"D":"H";
+}
+}
+
+if(s.total>=17) return "S";
+
+if(s.total===16){
+if([9,10,11].includes(d)) return "R";
+if(d<=6) return "S";
+return "H";
+}
+
+if(s.total===15){
+if(d===10) return "R";
+if(d<=6) return "S";
+return "H";
+}
+
+if([13,14].includes(s.total))
+return d<=6?"S":"H";
+
+if(s.total===12)
+return [4,5,6].includes(d)?"S":"H";
+
+if(s.total===11) return "D";
+if(s.total===10) return d<=9?"D":"H";
+if(s.total===9) return [3,4,5,6].includes(d)?"D":"H";
+
+return "H";
+}
+
+/* ---------- UI ---------- */
+
+function setMode(m){
+mode=m;
+document.getElementById("modeSelect").style.display="none";
+document.getElementById("game").style.display="block";
+next();
+}
+
+function next(){
+scenario=getScenario();
+
+document.getElementById("player").innerText=
+`Player: ${format(scenario.card1)}, ${format(scenario.card2)} (${scenario.total}${scenario.isSoft?" soft":""}${scenario.isPair?" pair":""})`;
+
+document.getElementById("dealer").innerText=
+`Dealer: ${format(scenario.dealer)}`;
+
+document.getElementById("result").innerText="";
+}
+
+function answer(a){
+
+const correctAction=strategy(scenario);
+
+total++;
+
+if(a===correctAction){
+correct++;
+document.getElementById("result").innerHTML=`<span class="correct">Correct ✔</span>`;
+}else{
+document.getElementById("result").innerHTML=
+`<span class="wrong">Wrong ❌ Correct: ${ACTIONS[correctAction]}</span>`;
+mistakeQueue.push(scenario);
+}
+
+document.getElementById("score").innerText=
+`Score: ${correct}/${total} (${Math.round(correct/total*100)}%) | Review: ${mistakeQueue.length}`;
+
+setTimeout(next,900);
+}
+
+</script>
+
+</body>
+</html>
