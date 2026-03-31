@@ -164,7 +164,7 @@
 
     function getScenario() {
 
-      if (mistakeQueue.length && Math.random() < 0.3)
+      if (mistakeQueue.length && Math.random() < 0.6)
         return mistakeQueue.shift();
 
       while (true) {
@@ -280,8 +280,12 @@
         document.getElementById("result").innerHTML =
           `<span class="wrong">Wrong ❌ Correct: ${ACTIONS[correctAction]}</span>`;
         mistakeQueue.push(scenario);
-        mistakeQueue.push(scenario);
-        mistakeQueue.push(scenario);
+        const scenario2 = {...scenario};
+        scenario2.dealer = drawCard();
+        mistakeQueue.push(scenario2);
+        const scenario3 = {...scenario};
+        scenario3.dealer = drawCard();
+        mistakeQueue.push(scenario3);
       }
 
       document.getElementById("score").innerText =
