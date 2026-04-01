@@ -146,6 +146,34 @@
       }
     }
 
+    function weightedSoft() {
+
+      const pairs = [
+        [2, 11], [3, 11], [4, 11], [5, 11], [6, 11], [7, 11], [8, 11],
+        [9, 11], // still useful (double logic)
+        [10, 11] // rare
+      ];
+
+      // reduce frequency of 9,11 | 10,11
+      const weights = [
+        5, 5, 5, 5, 5, 5, 5, 5,
+        2,
+        1 // 10,10 very rare
+      ];
+
+      let totalWeight = weights.reduce((a, b) => a + b, 0);
+      let r = Math.random() * totalWeight;
+
+      for (let i = 0; i < pairs.length; i++) {
+        if (r < weights[i]) {
+          const p = pairs[i];
+          const dealer = drawCard();
+          return { card1: p[0], card2: p[1], dealer, ...evaluate(p[0], p[1]) };
+        }
+        r -= weights[i];
+      }
+    }
+
     function weightedHard() {
       const tough = [
         [10, 6], [9, 7], [10, 5], [9, 6], [10, 2], [8, 4], [7, 5], [10, 3], [9, 5]
@@ -178,7 +206,7 @@
 
         if (mode === "ALL") return s;
         if (mode === "PAIRS") return weightedPair();
-        if (mode === "SOFT" && s.isSoft && !s.isPair) return s;
+        if (mode === "SOFT") return weightedSoft();
         if (mode === "HARD" && !s.isSoft && !s.isPair) return s;
       }
     }
