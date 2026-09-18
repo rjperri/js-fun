@@ -225,6 +225,68 @@
     font-size: 14px
   }
 
+  .winner {
+    background: #fff;
+    border: 1px solid var(--rule);
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+
+  .winner-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+  }
+
+  .winner-score {
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .owner {
+    margin-bottom: 22px;
+  }
+
+  .owner h3 {
+    margin: 0 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+  }
+
+  .game {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .game:last-child {
+    border-bottom: none;
+  }
+
+  .game-left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .matchup {
+    font-weight: 600;
+  }
+
+  .detail {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .result {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
   @media (prefers-reduced-motion:reduce) {
     .fill {
       transition: none
@@ -246,6 +308,8 @@
 
   <div id="msg"></div>
   <div id="standings"></div>
+  <h2>Week Leaderboard</h2>
+  <div id="weeklyWinner"></div>
   <h2 id="weekhead">This week</h2>
   <div class="grid" id="week"></div>
   <p class="muted small" id="stamp"></p>
@@ -381,7 +445,28 @@
 
   function render() {
     const rows = tally();
+    const bestScore = Math.max(...rows.map(r => r.weekPts));
+    const winners = rows.filter(r => r.weekPts === bestScore);
     const max = Math.max(1, ...rows.map(r => r.points));
+    const weeklyRows = [...rows].sort((a, b) => b.weekPts - a.weekPts);
+
+    if (bestScore === 0) {
+      document.getElementById("weeklyWinner").innerHTML =
+        `<div class="winner">No games completed.</div>`;
+    } else {
+      document.getElementById("weeklyWinner").innerHTML =
+        weeklyRows.map((r, i) => `
+            <div class="row">
+                <span class="rank">${i + 1}</span>
+                <div class="main">
+                    <div class="top">
+                        <span class="who">${r.name}</span>
+                        <span class="pts">${fmt(r.weekPts)}</span>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    }
     document.getElementById("standings").innerHTML = rows.map((r, i) => `
     <div class="row">
       <span class="rank">${i + 1}</span>
@@ -391,25 +476,60 @@
         <div class="wk">${r.wins} wins${r.ties ? ` · ${r.ties} ties` : ""}${r.bonuses ? ` · ${r.bonuses} bonus` : ""} · ${fmt(r.weekPts)} this week</div>
       </div>
     </div>`).join("");
-
     document.getElementById("weeklabel").textContent = "Week " + viewWeek;
     document.getElementById("weekhead").textContent = "Week " + viewWeek + " results";
     const marks = results[viewWeek] || {};
-    const order = Object.keys(TEAMS).sort((a, b) => (OWNER[a] || "").localeCompare(OWNER[b] || "") || a.localeCompare(b));
-    document.getElementById("week").innerHTML = order.map(a => {
-      const [name, color] = TEAMS[a];
-      const m = marks[a];
-      const res = m?.res;
-      const cls = res === "W" ? "win" : res === "L" ? "loss" : res === "T" ? "tie" : "";
-      const bonus = m?.bonus?.length ? `<span class="bonus">${m.bonus.join(" + ")}</span>` : "";
-      return `<div class="chip ${cls}" style="--tc:${color}">
-      <span class="abbr">${a}</span>
-      <span class="own">${OWNER[a] || name}${bonus}</span>
-      <span class="res">${res === "W" ? (m.bonus.length ? "W +" + m.bonus.length : "W") : res || "–"}</span></div>`;
-    }).join("");
+    let html = "";
+    for (const [owner, teams] of Object.entries(ROSTERS)) {
+      html += `<div class="owner"><h3>${owner}</h3>`;
+      for (const team of teams) {
+        const game = marks[team];
+        const [teamName] = TEAMS[team];
+        let matchup = teamName;
+        let detail = "";
+        let result = "";
+        if (game) {
+          const [oppName] = TEAMS[game.opponent];
+          matchup = game.home
+            ? `${team} vs ${game.opponent}`
+            : `${team} @ ${game.opponent}`;
+          if (game.completed) {
+            detail = `${game.teamScore}-${game.oppScore}`;
+            result = game.res;
+            if (game.bonus.length)
+              result += " +" + game.bonus.length;
+          } else {
+            const kickoff = new Date(game.kickoff);
+            detail =
+              kickoff.toLocaleDateString([], { weekday: "short" }) +
+              " " +
+              kickoff.toLocaleTimeString([], {
+                hour: "numeric",
+                minute: "2-digit"
+              });
+            result = game.state;
+          }
+        } else {
+          detail = "No game";
+        }
+        html += `
+        <div class="game">
+            <div class="game-left">
+                <div class="matchup">${matchup}</div>
+                <div class="detail">${detail}</div>
+            </div>
+            <div class="result">${result}</div>
+        </div>`;
+      }
+      html += "</div>";
+    }
+    document.getElementById("week").innerHTML = html;
 
-    const played = Object.values(marks).length;
-    if (!played) setMsg(`No finished games in week ${viewWeek} yet.`); else setMsg("");
+    const games = Object.values(marks).length;
+    if (!games)
+      setMsg(`No NFL games scheduled for Week ${viewWeek}.`);
+    else
+      setMsg("");
   }
 
   function setMsg(t) {
