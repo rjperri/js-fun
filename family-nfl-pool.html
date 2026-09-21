@@ -272,6 +272,18 @@
     flex-direction: column;
   }
 
+  .game-info{
+      display:flex;
+      align-items:center;
+      gap:10px;
+  }
+
+  .logo{
+      width:28px;
+      height:28px;
+      object-fit:contain;
+      flex-shrink:0;
+  }
   .matchup {
     font-weight: 600;
   }
@@ -359,10 +371,14 @@
       const comp = ev.competitions?.[0];
       if (!comp) continue;
       const [a, b] = comp.competitors;
-      const A = norm(a.team.abbreviation), B = norm(b.team.abbreviation);
+      const A = norm(a.team.abbreviation);
+      const B = norm(b.team.abbreviation);
+
+      const logoA = a.team.logo;
+      const logoB = b.team.logo;
       const sa = Number(a.score), sb = Number(b.score);
       const ot = (comp.status?.period || 4) > 4;
-      const saveGame = (team, opponent, teamScore, oppScore, home) => {
+      const saveGame = (team, opponent, teamScore, oppScore, home, logo) => {
         const bonus = [];
         let res = null;
         if (comp.status.type.completed) {
@@ -390,12 +406,13 @@
           completed: comp.status.type.completed,
           state: comp.status.type.description,
           kickoff: ev.date,
+          logo,
           res,
           bonus
         };
       };
-      saveGame(A, B, sa, sb, false);
-      saveGame(B, A, sb, sa, true);
+      saveGame(A, B, sa, sb, false, logoA);
+      saveGame(B, A, sb, sa, true, logoB);
     }
     results[week] = marks;
   }
@@ -441,6 +458,58 @@
     return rows.sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
   }
 
+  function renderWeekGames() {
+    const marks = results[viewWeek] || {};
+    let html = "";
+    for (const [owner, teams] of Object.entries(ROSTERS)) {
+      html += `<div class="owner"><h3>${owner}</h3>`;
+      for (const team of teams) {
+        const game = marks[team];
+        const [teamName] = TEAMS[team];
+        let matchup = teamName;
+        let detail = "";
+        let result = "";
+        if (game) {
+          const [oppName] = TEAMS[game.opponent];
+          matchup = game.home
+            ? `${team} vs ${game.opponent}`
+            : `${team} @ ${game.opponent}`;
+          if (game.completed) {
+            detail = `${game.teamScore}-${game.oppScore}`;
+            result = game.res;
+            if (game.bonus.length)
+              result += " +" + game.bonus.length;
+          } else {
+            const kickoff = new Date(game.kickoff);
+            detail =
+              kickoff.toLocaleDateString([], { weekday: "short" }) +
+              " " +
+              kickoff.toLocaleTimeString([], {
+                hour: "numeric",
+                minute: "2-digit"
+              });
+            result = game.state;
+          }
+        } else {
+          detail = "No game";
+        }
+        html += `
+        <div class="game">
+            <div class="game-info">
+              <img class="logo" src="${game?.logo || ""}" alt="${team}">
+              <div class="game-left">
+                  <div class="matchup">${matchup}</div>
+                  <div class="detail">${detail}</div>
+              </div>
+            </div>
+            <div class="result">${result}</div>
+        </div>`;
+      }
+      html += "</div>";
+    }
+    document.getElementById("week").innerHTML = html;
+  }
+
   const fmt = n => n % 1 ? n.toFixed(1) : String(n);
 
   function render() {
@@ -478,52 +547,8 @@
     </div>`).join("");
     document.getElementById("weeklabel").textContent = "Week " + viewWeek;
     document.getElementById("weekhead").textContent = "Week " + viewWeek + " results";
-    const marks = results[viewWeek] || {};
-    let html = "";
-    for (const [owner, teams] of Object.entries(ROSTERS)) {
-      html += `<div class="owner"><h3>${owner}</h3>`;
-      for (const team of teams) {
-        const game = marks[team];
-        const [teamName] = TEAMS[team];
-        let matchup = teamName;
-        let detail = "";
-        let result = "";
-        if (game) {
-          const [oppName] = TEAMS[game.opponent];
-          matchup = game.home
-            ? `${team} vs ${game.opponent}`
-            : `${team} @ ${game.opponent}`;
-          if (game.completed) {
-            detail = `${game.teamScore}-${game.oppScore}`;
-            result = game.res;
-            if (game.bonus.length)
-              result += " +" + game.bonus.length;
-          } else {
-            const kickoff = new Date(game.kickoff);
-            detail =
-              kickoff.toLocaleDateString([], { weekday: "short" }) +
-              " " +
-              kickoff.toLocaleTimeString([], {
-                hour: "numeric",
-                minute: "2-digit"
-              });
-            result = game.state;
-          }
-        } else {
-          detail = "No game";
-        }
-        html += `
-        <div class="game">
-            <div class="game-left">
-                <div class="matchup">${matchup}</div>
-                <div class="detail">${detail}</div>
-            </div>
-            <div class="result">${result}</div>
-        </div>`;
-      }
-      html += "</div>";
-    }
-    document.getElementById("week").innerHTML = html;
+    
+    renderWeekGames();
 
     const games = Object.values(marks).length;
     if (!games)
