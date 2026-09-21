@@ -272,18 +272,19 @@
     flex-direction: column;
   }
 
-  .game-info{
-      display:flex;
-      align-items:center;
-      gap:10px;
+  .game-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
-  .logo{
-      width:28px;
-      height:28px;
-      object-fit:contain;
-      flex-shrink:0;
+  .logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
+
   .matchup {
     font-weight: 600;
   }
@@ -461,10 +462,29 @@
   function renderWeekGames() {
     const marks = results[viewWeek] || {};
     let html = "";
+    let familyGames = [];
+
     for (const [owner, teams] of Object.entries(ROSTERS)) {
       html += `<div class="owner"><h3>${owner}</h3>`;
       for (const team of teams) {
         const game = marks[team];
+        if (game) {
+          const opponentOwner = OWNER[game.opponent];
+
+          if (
+            opponentOwner &&
+            opponentOwner !== owner &&
+            team < game.opponent
+          ) {
+            familyGames.push({
+              owner1: owner,
+              owner2: opponentOwner,
+              team1: team,
+              team2: game.opponent,
+              game
+            });
+          }
+        }
         const [teamName] = TEAMS[team];
         let matchup = teamName;
         let detail = "";
@@ -507,6 +527,43 @@
       }
       html += "</div>";
     }
+    if (familyGames.length) {
+
+      let familyHtml = `<div class="owner"><h3>🔥 Family Matchups</h3>`;
+
+      for (const f of familyGames) {
+
+        let status;
+
+        if (f.game.completed) {
+          status = `${f.game.teamScore}-${f.game.oppScore}`;
+        } else {
+          const kickoff = new Date(f.game.kickoff);
+
+          status =
+            kickoff.toLocaleDateString([], { weekday: "short" }) +
+            " " +
+            kickoff.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit"
+            });
+        }
+
+        familyHtml += `
+        <div class="game">
+            <div class="game-left">
+                <div class="matchup">
+                    ${f.owner1} (${f.team1}) vs ${f.owner2} (${f.team2})
+                </div>
+                <div class="detail">${status}</div>
+            </div>
+        </div>`;
+      }
+
+      familyHtml += `</div>`;
+
+      html = familyHtml + html;
+    }
     document.getElementById("week").innerHTML = html;
   }
 
@@ -547,7 +604,7 @@
     </div>`).join("");
     document.getElementById("weeklabel").textContent = "Week " + viewWeek;
     document.getElementById("weekhead").textContent = "Week " + viewWeek + " results";
-    
+
     renderWeekGames();
 
     const games = Object.values(marks).length;
