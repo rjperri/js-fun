@@ -305,69 +305,72 @@
       transition: none
     }
   }
+
   .tabs {
-  display: flex;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 14px;
-  grid-column: 1 / -1;
-}
+    display: flex;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 14px;
+    grid-column: 1 / -1;
+  }
 
-.tab {
-  flex: 1;
-  padding: 10px 5px;
-  border: none;
-  background: transparent;
-  font-weight: 600;
-  color: var(--muted);
-}
+  .tab {
+    flex: 1;
+    padding: 10px 5px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    color: var(--muted);
+  }
 
-.tab.active {
-  color: var(--ink);
-  border-bottom: 3px solid var(--ink);
-}
+  .tab.active {
+    color: var(--ink);
+    border-bottom: 3px solid var(--ink);
+  }
 
-.game-card {
-  padding: 14px 0;
-  border-bottom: 1px solid var(--rule);
-}
+  .game-card {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
 
-.game-teams {
-  font-weight: 600;
-  font-size: 17px;
-}
+  .game-teams {
+    font-weight: 600;
+    font-size: 17px;
+  }
 
-.game-owner,
-.game-time {
-  font-size: 14px;
-  color: var(--muted);
-  margin-top: 4px;
-}
+  .game-owner,
+  .game-time {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
 
-.game-score {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  margin-top: 6px;
-}
+  .game-score {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
 
-.game-result {
-  font-weight: 700;
-  margin-top: 4px;
-}
-.game-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+  .game-result {
+    font-weight: 700;
+    margin-top: 4px;
+  }
 
-.game-logo {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-}
-.ot {
-  color: var(--muted);
-}
+  .game-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .game-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  .ot {
+    color: var(--muted);
+  }
 </style>
 
 <div class="wrap">
@@ -501,6 +504,8 @@
       document.getElementById("stamp").textContent =
         "Updated " + new Date().toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" });
     } catch (e) {
+      /*console.error(e);
+      setMsg("Error: " + e.message);*/
       setMsg("Couldn't reach the score feed. Open this file straight in a browser (or host it) — some previews block outside requests.");
     }
     document.getElementById("refresh").disabled = false;
@@ -526,9 +531,9 @@
   }
 
   function renderWeekGames() {
-  const marks = results[viewWeek] || {};
+    const marks = results[viewWeek] || {};
 
-  let html = `
+    let html = `
     <div class="tabs">
       ${Object.keys(ROSTERS).map(owner => `
         <button 
@@ -540,49 +545,49 @@
     </div>
   `;
 
-  const teams = ROSTERS[selectedOwner];
+    const teams = ROSTERS[selectedOwner];
 
-  for (const team of teams) {
-    const game = marks[team];
-    if (!game) continue;
+    for (const team of teams) {
+      const game = marks[team];
+      if (!game) continue;
 
-    const opponent = game.opponent;
-    const opponentOwner = OWNER[opponent];
+      const opponent = game.opponent;
+      const opponentOwner = OWNER[opponent];
 
-    const teamName = TEAMS[team][0];
-    const opponentName = TEAMS[opponent][0];
+      const teamName = TEAMS[team][0];
+      const opponentName = TEAMS[opponent][0];
 
-    let status = "";
-    let result = "";
+      let status = "";
+      let result = "";
 
-    if (game.completed) {
-      status = `
+      if (game.completed) {
+        status = `
         Final<br>
         ${game.teamScore}-${game.oppScore}
       `;
 
-      result =
-        game.res === "W" ? "✅ Win" :
-        game.res === "L" ? "❌ Loss" :
-        "➖ Tie";
+        result =
+          game.res === "W" ? "✅ Win" :
+            game.res === "L" ? "❌ Loss" :
+              "➖ Tie";
 
-      if (game.overtime) {
-        status += `<br><span class="ot">Overtime</span>`;
+        if (game.overtime) {
+          status += `<br><span class="ot">Overtime</span>`;
+        }
+
+      } else {
+        const kickoff = new Date(game.kickoff);
+
+        status =
+          kickoff.toLocaleDateString([], { weekday: "long" }) +
+          " " +
+          kickoff.toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit"
+          });
       }
 
-    } else {
-      const kickoff = new Date(game.kickoff);
-
-      status =
-        kickoff.toLocaleDateString([], { weekday: "long" }) +
-        " " +
-        kickoff.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit"
-        });
-    }
-
-    html += `
+      html += `
       <div class="game-card">
 
         <div class="game-header">
@@ -610,16 +615,16 @@
 
       </div>
     `;
+    }
+
+    document.getElementById("week").innerHTML = html;
   }
 
-  document.getElementById("week").innerHTML = html;
-}
 
-
-function selectOwner(owner) {
-  selectedOwner = owner;
-  renderWeekGames();
-}
+  function selectOwner(owner) {
+    selectedOwner = owner;
+    renderWeekGames();
+  }
   const fmt = n => n % 1 ? n.toFixed(1) : String(n);
 
   function render() {
@@ -660,7 +665,7 @@ function selectOwner(owner) {
 
     renderWeekGames();
 
-    const games = Object.values(marks).length;
+    const games = Object.values(results[viewWeek] || {}).length;
     if (!games)
       setMsg(`No NFL games scheduled for Week ${viewWeek}.`);
     else
