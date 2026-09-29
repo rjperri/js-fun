@@ -75,6 +75,7 @@
       <button onclick="answer('D')">Double</button>
       <button onclick="answer('P')">Split</button>
       <button onclick="answer('R')">Surrender</button>
+      <button onclick="showHint()" style="background:#2d5a87;">Hint</button>
       <button onclick="goBack()" style="background:#444;">Back to Mode Select</button>
     </div>
 
@@ -308,10 +309,10 @@
         document.getElementById("result").innerHTML =
           `<span class="wrong">Wrong ❌ Correct: ${ACTIONS[correctAction]}</span>`;
         mistakeQueue.push(scenario);
-        const scenario2 = {...scenario};
+        const scenario2 = { ...scenario };
         scenario2.dealer = drawCard();
         mistakeQueue.push(scenario2);
-        const scenario3 = {...scenario};
+        const scenario3 = { ...scenario };
         scenario3.dealer = drawCard();
         mistakeQueue.push(scenario3);
       }
@@ -321,7 +322,10 @@
 
       setTimeout(next, 900);
     }
-
+    
+    function showHint() {
+      alert("Hint");
+    }
     function goBack() {
 
       mode = "ALL";

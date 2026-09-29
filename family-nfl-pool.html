@@ -429,6 +429,7 @@
   let viewWeek = null;
   let selectedOwner = "Dad";
   const results = {}; // week -> { ABBR: "W"|"L"|"T" }
+  const weekRanges = {}; // week -> { firstDate, lastDate }
 
 
   async function getWeek(week) {
@@ -436,9 +437,16 @@
     if (!r.ok) throw new Error("feed unavailable");
     const data = await r.json();
     const marks = {};
+    let firstDate = null;
+    let lastDate = null;
     for (const ev of data.events || []) {
       const comp = ev.competitions?.[0];
       if (!comp) continue;
+      const kickoff = new Date(ev.date);
+      if (!firstDate || kickoff < firstDate)
+        firstDate = kickoff;
+      if (!lastDate || kickoff > lastDate)
+        lastDate = kickoff;
       const [a, b] = comp.competitors;
       const A = norm(a.team.abbreviation);
       const B = norm(b.team.abbreviation);
@@ -485,6 +493,10 @@
       saveGame(B, A, sb, sa, true, logoB);
     }
     results[week] = marks;
+    weekRanges[week] = {
+      firstDate,
+      lastDate
+    };
   }
 
   async function loadAll() {
@@ -661,6 +673,22 @@
       </div>
     </div>`).join("");
     document.getElementById("weeklabel").textContent = "Week " + viewWeek;
+    const range = weekRanges[viewWeek];
+
+    if (range?.firstDate) {
+      const start = range.firstDate.toLocaleDateString([], {
+        month: "short",
+        day: "numeric"
+      });
+
+      const end = range.lastDate.toLocaleDateString([], {
+        month: "short",
+        day: "numeric"
+      });
+
+      document.getElementById("weeklabel").textContent =
+        `Week ${viewWeek} (${start} – ${end})`;
+    }
     document.getElementById("weekhead").textContent = "Week " + viewWeek + " results";
 
     renderWeekGames();
