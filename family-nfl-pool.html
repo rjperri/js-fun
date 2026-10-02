@@ -448,6 +448,12 @@
       if (!lastDate || kickoff > lastDate)
         lastDate = kickoff;
       const [a, b] = comp.competitors;
+      const broadcast =
+        comp.broadcasts?.[0]?.names?.join(", ") ||
+        comp.geoBroadcasts?.[0]?.media?.shortName ||
+        "";
+      const recordA = a.records?.find(r => r.type === "total")?.summary ?? "";
+      const recordB = b.records?.find(r => r.type === "total")?.summary ?? "";
       const A = norm(a.team.abbreviation);
       const B = norm(b.team.abbreviation);
 
@@ -455,7 +461,7 @@
       const logoB = b.team.logo;
       const sa = Number(a.score), sb = Number(b.score);
       const ot = (comp.status?.period || 4) > 4;
-      const saveGame = (team, opponent, teamScore, oppScore, home, logo) => {
+      const saveGame = (team, opponent, teamScore, oppScore, home, logo, record, opponentRecord, broadcast) => {
         const bonus = [];
         let res = null;
         if (comp.status.type.completed) {
@@ -487,10 +493,15 @@
           res,
           bonus,
           overtime: ot,
+          period: comp.status?.period,
+          clock: comp.status?.displayClock,
+          record,
+          opponentRecord,
+          broadcast
         };
       };
-      saveGame(A, B, sa, sb, false, logoA);
-      saveGame(B, A, sb, sa, true, logoB);
+      saveGame(A, B, sa, sb, false, logoA, recordA, recordB, broadcast);
+      saveGame(B, A, sb, sa, true, logoB, recordB, recordA, broadcast);
     }
     results[week] = marks;
     weekRanges[week] = {
@@ -587,6 +598,20 @@
           status += `<br><span class="ot">Overtime</span>`;
         }
 
+      } else if (game.period > 0) {
+
+        const quarter =
+          game.period === 1 ? "1st" :
+            game.period === 2 ? "2nd" :
+              game.period === 3 ? "3rd" :
+                game.period === 4 ? "4th" :
+                  "OT";
+
+        status = `
+    ${game.teamScore}-${game.oppScore}<br>
+    ${quarter} · ${game.clock || ""}
+  `;
+
       } else {
         const kickoff = new Date(game.kickoff);
 
@@ -605,9 +630,9 @@
         <div class="game-header">
           <img class="game-logo" src="${game.logo}" alt="${team}">
           <div class="game-teams">
-            ${teamName} (${team})
-            ${game.home ? "vs" : "@"}
-            ${opponentName} (${opponent})
+            ${teamName} (${team}) (${game.record})
+            ${game.home ? "vs" : "@"} </br>
+            ${opponentName} (${opponent}) (${game.opponentRecord})
           </div>
         </div>
 
@@ -618,6 +643,12 @@
         <div class="game-time">
           ${status}
         </div>
+
+        ${game.broadcast ? `
+          <div class="game-owner">
+              TV: ${game.broadcast}
+          </div>
+          ` : ""}
 
         ${result ? `
           <div class="game-result">
