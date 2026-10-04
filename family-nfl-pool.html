@@ -1,398 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16181C">
 <title>Family NFL Pool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap');
-
   :root {
     --paper: #F2F1EE;
     --ink: #16181C;
     --rule: #D8D6D0;
-    --muted: #6E6C66
+    --muted: #6E6C66;
+    --card: #fff;
   }
 
-  * {
-    box-sizing: border-box
-  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
     background: var(--paper);
     color: var(--ink);
     font-family: Barlow, system-ui, sans-serif;
-    line-height: 1.45;
+    line-height: 1.4;
     margin: 0;
-    padding: 22px 0 48px
+    padding-bottom: 56px;
   }
 
-  .wrap {
-    max-width: 660px;
-    margin: 0 auto;
-    padding: 0 18px
-  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; }
 
-  h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 42px;
-    line-height: 1;
-    margin: 0 0 4px
-  }
-
-  .muted {
-    color: var(--muted);
-    font-size: 15px;
-    margin: 0
-  }
-
-  .small {
-    font-size: 13px
-  }
-
-  .bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 18px 0 8px;
-    flex-wrap: wrap
-  }
-
-  .weeknum {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 22px
-  }
-
-  button {
-    font-family: inherit;
-    cursor: pointer;
-    border-radius: 2px
-  }
-
-  .step {
-    width: 34px;
-    height: 34px;
-    font-size: 20px;
-    background: #fff;
-    border: 1px solid var(--rule);
-    color: var(--ink)
-  }
-
-  .refresh {
-    margin-left: auto;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 9px 13px;
+  /* ---------- Hero ---------- */
+  .hero {
     background: var(--ink);
     color: var(--paper);
-    border: 0
+    padding: 26px 0 20px;
+    padding-top: max(26px, env(safe-area-inset-top));
   }
-
-  button:disabled {
-    opacity: .45;
-    cursor: not-allowed
-  }
-
-  button:focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 2px
-  }
-
-  .row {
-    display: flex;
-    gap: 10px;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--rule)
-  }
-
-  .rank {
+  h1 {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 27px;
-    font-weight: 700;
-    color: var(--rule);
-    width: 24px;
-    line-height: 1.1
-  }
-
-  .main {
-    flex: 1;
-    min-width: 0
-  }
-
-  .top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 10px
-  }
-
-  .who {
-    font-size: 18px;
-    font-weight: 600
-  }
-
-  .pts {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 27px;
-    font-weight: 700;
-    line-height: 1
-  }
-
-  .track {
-    height: 4px;
-    background: var(--rule);
-    margin: 7px 0
-  }
-
-  .fill {
-    height: 100%;
-    background: var(--ink);
-    transition: width .35s ease
-  }
-
-  .wk {
-    font-size: 13px;
-    color: var(--muted)
-  }
-
-  h2 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    margin: 26px 0 8px;
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: 5px
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px
-  }
-
-  .chip {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    border: 1px solid var(--rule);
-    border-left: 5px solid var(--tc);
-    padding: 9px 10px;
-    font-size: 14px
-  }
-
-  .abbr {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 17px
-  }
-
-  .own {
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap
-  }
-
-  .res {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 14px
-  }
-
-  .win {
-    background: var(--tc);
-    border-color: var(--tc);
-    color: #fff
-  }
-
-  .win .own {
-    color: rgba(255, 255, 255, .82)
-  }
-
-  .loss {
-    opacity: .42
-  }
-
-  .tie {
-    border-style: dashed
-  }
-
-  .msg {
-    border-left: 3px solid var(--ink);
-    padding: 8px 12px;
-    margin: 14px 0;
-    font-size: 14px
-  }
-
-  .winner {
-    background: #fff;
-    border: 1px solid var(--rule);
-    padding: 14px;
-    margin-bottom: 20px;
-  }
-
-  .winner-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 30px;
-    font-weight: 700;
-  }
-
-  .winner-score {
-    color: var(--muted);
-    font-size: 15px;
-  }
-
-  .owner {
-    margin-bottom: 22px;
-  }
-
-  .owner h3 {
+    font-weight: 800;
+    font-size: 52px;
+    line-height: .95;
+    letter-spacing: .5px;
+    text-transform: uppercase;
     margin: 0 0 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--rule);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 22px;
   }
+  .tagline { margin: 0 0 16px; font-size: 15px; color: #C9C7C0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; }
+  .legend .owner-chip { font-size: 14px; padding: 5px 12px 5px 8px; }
 
-  .game {
-    display: flex;
-    justify-content: space-between;
+  /* ---------- Owner chip ---------- */
+  .owner-chip {
+    display: inline-flex;
     align-items: center;
-    padding: 6px 0;
-    border-bottom: 1px solid #eee;
+    gap: 6px;
+    background: #fff;
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 3px 10px 3px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
   }
-
-  .game:last-child {
-    border-bottom: none;
-  }
-
-  .game-left {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .game-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .logo {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
+  .owner-chip::before {
+    content: "";
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--oc);
     flex-shrink: 0;
   }
 
-  .matchup {
-    font-weight: 600;
-  }
-
-  .detail {
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .result {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  @media (prefers-reduced-motion:reduce) {
-    .fill {
-      transition: none
-    }
-  }
-
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--rule);
-    margin-bottom: 14px;
-    grid-column: 1 / -1;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 10px 5px;
-    border: none;
-    background: transparent;
-    font-weight: 600;
-    color: var(--muted);
-  }
-
-  .tab.active {
-    color: var(--ink);
-    border-bottom: 3px solid var(--ink);
-  }
-
-  .game-card {
-    padding: 14px 0;
+  /* ---------- Sticky week bar ---------- */
+  .bar-outer {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--paper);
     border-bottom: 1px solid var(--rule);
   }
-
-  .game-teams {
-    font-weight: 600;
-    font-size: 17px;
-  }
-
-  .game-owner,
-  .game-time {
-    font-size: 14px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-
-  .game-score {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    margin-top: 6px;
-  }
-
-  .game-result {
-    font-weight: 700;
-    margin-top: 4px;
-  }
-
-  .game-header {
+  .bar {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    padding: 10px 0;
   }
-
-  .game-logo {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
+  .weeknum {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.05;
+    flex: 1;
+    text-align: center;
+    min-width: 0;
   }
-
-  .ot {
+  .weeknum small {
+    display: block;
+    font-family: Barlow, sans-serif;
+    font-weight: 500;
+    font-size: 12px;
     color: var(--muted);
   }
+  button { font-family: inherit; cursor: pointer; border-radius: 8px; }
+  .step {
+    width: 46px; height: 46px;
+    font-size: 24px;
+    background: #fff;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .step:active { background: var(--rule); }
+  .refresh {
+    height: 46px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--ink);
+    color: var(--paper);
+    border: 0;
+    flex-shrink: 0;
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button:focus-visible { outline: 3px solid #2563EB; outline-offset: 2px; }
+
+  /* ---------- Section headings ---------- */
+  h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin: 30px 0 4px;
+  }
+  .sub { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+  .muted { color: var(--muted); font-size: 14px; margin: 0; }
+  .small { font-size: 13px; }
+
+  .msg {
+    background: #fff;
+    border-left: 4px solid var(--ink);
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+
+  /* ---------- Standings ---------- */
+  .row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 8px solid var(--oc);
+    border-radius: 8px;
+    padding: 12px 14px 12px 12px;
+    margin-bottom: 8px;
+  }
+  .rank {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--muted);
+    width: 24px;
+    line-height: 1;
+    text-align: center;
+  }
+  .row.first .rank { color: var(--ink); }
+  .main { flex: 1; min-width: 0; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .who { font-size: 20px; font-weight: 700; }
+  .pts {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .track { height: 8px; background: #E9E7E1; border-radius: 99px; margin: 8px 0 6px; overflow: hidden; }
+  .fill { height: 100%; background: var(--oc); border-radius: 99px; transition: width .35s ease; }
+  .wk { font-size: 13px; color: var(--muted); }
+
+  .row.compact { padding: 8px 14px 8px 12px; align-items: center; }
+  .row.compact .rank { font-size: 26px; }
+  .row.compact .who { font-size: 18px; }
+  .row.compact .pts { font-size: 28px; }
+  .row.compact .top { flex: 1; align-items: center; }
+
+  /* ---------- Matchups ---------- */
+  .day {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin: 18px 0 8px;
+  }
+  .match {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+  .sides { display: grid; grid-template-columns: 1fr 1fr; position: relative; }
+  .side {
+    background: var(--tc);
+    color: var(--tx);
+    padding: 14px 10px 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+  }
+  .side .logo-wrap {
+    width: 54px; height: 54px;
+    background: rgba(255,255,255,.92);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .side img { width: 38px; height: 38px; object-fit: contain; }
+  .abbr {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: .5px;
+  }
+  .nick { font-size: 13px; opacity: .9; font-weight: 600; }
+  .rec { font-size: 12px; opacity: .8; margin-bottom: 6px; }
+  .score {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .side .owner-chip { margin-top: auto; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  .at {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid #fff;
+  }
+  .match.done .side.lost { opacity: .45; }
+  .match.done .side.won { box-shadow: inset 0 -5px 0 rgba(255,255,255,.55); }
+  .foot {
+    padding: 10px 14px;
+    font-size: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .status { font-weight: 700; }
+  .live { color: #C81E1E; }
+  .live::before {
+    content: "";
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #C81E1E;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .tv { color: var(--muted); }
+  .badge {
+    background: var(--ink);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 7px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .badge.same { background: #7C3AED; }
+  .earned { font-weight: 700; }
+
+  /* ---------- Team by team ---------- */
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+  .tab {
+    min-height: 46px;
+    border: 2px solid var(--oc);
+    background: #fff;
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 4px;
+  }
+  .tab.active { background: var(--oc); color: var(--tx, #fff); }
+
+  .game-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 8px solid var(--tc);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .game-card.lost { opacity: .6; }
+  .game-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+  .game-body { flex: 1; min-width: 0; }
+  .game-teams { font-weight: 700; font-size: 17px; }
+  .game-teams span { font-weight: 500; color: var(--muted); font-size: 14px; }
+  .game-meta { font-size: 13px; color: var(--muted); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+  .pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: #E9E7E1;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .pill.W { background: var(--tc); color: var(--tx); }
+  .pill.L { background: #E9E7E1; color: var(--muted); }
+  .pill.T { background: #fff; border: 2px dashed var(--muted); }
+  .pill.score-live { font-size: 18px; padding: 0 8px; }
+
+  @media (max-width: 380px) {
+    h1 { font-size: 44px; }
+    .abbr { font-size: 26px; }
+    .score { font-size: 34px; }
+    .refresh { padding: 0 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fill { transition: none; }
+    .live::before { animation: none; }
+  }
 </style>
+</head>
+<body>
 
-<div class="wrap">
-  <h1>Family NFL Pool</h1>
-  <p class="muted">Eight teams each. A win is a point, a tie is half. Shutouts and overtime wins are worth a bonus point
-    each.</p>
-
-  <div class="bar">
-    <button class="step" id="prev" aria-label="Previous week">&lsaquo;</button>
-    <span class="weeknum" id="weeklabel">Week —</span>
-    <button class="step" id="next" aria-label="Next week">&rsaquo;</button>
-    <button class="refresh" id="refresh">Refresh scores</button>
+<header class="hero">
+  <div class="wrap">
+    <h1>Family NFL Pool</h1>
+    <p class="tagline">Eight teams each. A win is a point, a tie is half. Shutouts and overtime wins are worth a bonus point each.</p>
+    <div class="legend" id="legend"></div>
   </div>
+</header>
 
-  <div id="msg"></div>
-  <div id="standings"></div>
-  <h2>Week Leaderboard</h2>
-  <div id="weeklyWinner"></div>
-  <h2 id="weekhead">This week</h2>
-  <div class="grid" id="week"></div>
-  <p class="muted small" id="stamp"></p>
+<div class="bar-outer">
+  <div class="wrap">
+    <div class="bar">
+      <button class="step" id="prev" aria-label="Previous week">&lsaquo;</button>
+      <div class="weeknum" id="weeklabel">Week —</div>
+      <button class="step" id="next" aria-label="Next week">&rsaquo;</button>
+      <button class="refresh" id="refresh">Refresh</button>
+    </div>
+  </div>
 </div>
+
+<main class="wrap">
+  <div id="msg"></div>
+
+  <h2>Standings</h2>
+  <p class="sub">Season total</p>
+  <div id="standings"></div>
+
+  <h2>Week Leaderboard</h2>
+  <p class="sub" id="weeksub">This week</p>
+  <div id="weeklyWinner"></div>
+
+  <h2>Matchups</h2>
+  <p class="sub">Every game, with whose team is on each side</p>
+  <div id="matchups"></div>
+
+  <h2 id="weekhead">Team by team</h2>
+  <p class="sub">Pick a person to see just their eight teams</p>
+  <div id="week"></div>
+
+  <p class="muted small" id="stamp"></p>
+</main>
 
 <script>
   const ROSTERS = {
@@ -400,6 +403,14 @@
     Mom: ["PHI", "SF", "DET", "BUF", "LAR", "LAC", "TB", "DEN"],
     Sawyer: ["JAX", "KC", "ATL", "MIA", "ARI", "BAL", "NYG", "GB"],
     Jack: ["CAR", "HOU", "LV", "NYJ", "TEN", "MIN", "DAL", "CLE"]
+  };
+
+  // One color per person (kept clear of most team colors so chips stand out)
+  const OWNER_COLOR = {
+    Dad: "#2563EB",
+    Mom: "#DB2777",
+    Sawyer: "#F59E0B",
+    Jack: "#16A34A"
   };
 
   const TEAMS = {
@@ -423,14 +434,29 @@
   const OWNER = {};
   for (const [person, teams] of Object.entries(ROSTERS)) teams.forEach(t => OWNER[t] = person);
 
+  // Pick white or dark text so it's readable on any team/owner color
+  function textOn(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? "#16181C" : "#FFFFFF";
+  }
+  const teamName = t => (TEAMS[t] ? TEAMS[t][0] : t);
+  const teamColor = t => (TEAMS[t] ? TEAMS[t][1] : "#444444");
+  const ownerChip = o => o
+    ? `<span class="owner-chip" style="--oc:${OWNER_COLOR[o]}">${o}</span>`
+    : "";
+
   const API = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard";
   let season = new Date().getFullYear();
   let currentWeek = 1;
   let viewWeek = null;
   let selectedOwner = "Dad";
-  const results = {}; // week -> { ABBR: "W"|"L"|"T" }
+  try {
+    const saved = localStorage.getItem("nflPoolOwner");
+    if (saved && ROSTERS[saved]) selectedOwner = saved;
+  } catch (e) { }
+  const results = {};    // week -> { ABBR: gameInfo }
   const weekRanges = {}; // week -> { firstDate, lastDate }
-
 
   async function getWeek(week) {
     const r = await fetch(`${API}?seasontype=2&week=${week}&dates=${season}`);
@@ -443,10 +469,8 @@
       const comp = ev.competitions?.[0];
       if (!comp) continue;
       const kickoff = new Date(ev.date);
-      if (!firstDate || kickoff < firstDate)
-        firstDate = kickoff;
-      if (!lastDate || kickoff > lastDate)
-        lastDate = kickoff;
+      if (!firstDate || kickoff < firstDate) firstDate = kickoff;
+      if (!lastDate || kickoff > lastDate) lastDate = kickoff;
       const [a, b] = comp.competitors;
       const broadcast =
         comp.broadcasts?.[0]?.names?.join(", ") ||
@@ -456,58 +480,40 @@
       const recordB = b.records?.find(r => r.type === "total")?.summary ?? "";
       const A = norm(a.team.abbreviation);
       const B = norm(b.team.abbreviation);
-
-      const logoA = a.team.logo;
-      const logoB = b.team.logo;
       const sa = Number(a.score), sb = Number(b.score);
       const ot = (comp.status?.period || 4) > 4;
-      const saveGame = (team, opponent, teamScore, oppScore, home, logo, record, opponentRecord, broadcast) => {
+      const saveGame = (team, opponent, teamScore, oppScore, home, logo, record, opponentRecord) => {
         const bonus = [];
         let res = null;
         if (comp.status.type.completed) {
           if (teamScore > oppScore) {
             res = "W";
-
-            if (oppScore === 0)
-              bonus.push("Shutout");
-
-            if (ot)
-              bonus.push("OT");
-          }
-          else if (teamScore < oppScore) {
+            if (oppScore === 0) bonus.push("Shutout");
+            if (ot) bonus.push("OT");
+          } else if (teamScore < oppScore) {
             res = "L";
-          }
-          else {
+          } else {
             res = "T";
           }
         }
         marks[team] = {
-          opponent,
-          teamScore,
-          oppScore,
-          home,
+          opponent, teamScore, oppScore, home,
           completed: comp.status.type.completed,
           state: comp.status.type.description,
           kickoff: ev.date,
-          logo,
-          res,
-          bonus,
+          logo, res, bonus,
           overtime: ot,
           period: comp.status?.period,
           clock: comp.status?.displayClock,
-          record,
-          opponentRecord,
-          broadcast
+          record, opponentRecord, broadcast
         };
       };
-      saveGame(A, B, sa, sb, false, logoA, recordA, recordB, broadcast);
-      saveGame(B, A, sb, sa, true, logoB, recordB, recordA, broadcast);
+      // Use ESPN's own home/away flag so "@" and "vs" are right
+      saveGame(A, B, sa, sb, a.homeAway === "home", a.team.logo, recordA, recordB);
+      saveGame(B, A, sb, sa, b.homeAway === "home", b.team.logo, recordB, recordA);
     }
     results[week] = marks;
-    weekRanges[week] = {
-      firstDate,
-      lastDate
-    };
+    weekRanges[week] = { firstDate, lastDate };
   }
 
   async function loadAll() {
@@ -527,9 +533,7 @@
       document.getElementById("stamp").textContent =
         "Updated " + new Date().toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" });
     } catch (e) {
-      /*console.error(e);
-      setMsg("Error: " + e.message);*/
-      setMsg("Couldn't reach the score feed. Open this file straight in a browser (or host it) — some previews block outside requests.");
+      setMsg("Couldn't reach the score feed. Try Refresh in a moment. If you opened this as a local file, host it (like GitHub Pages) since some previews block outside requests.");
     }
     document.getElementById("refresh").disabled = false;
   }
@@ -553,187 +557,209 @@
     return rows.sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
   }
 
-  function renderWeekGames() {
+  const fmt = n => n % 1 ? n.toFixed(1) : String(n);
+
+  function statusText(g) {
+    if (g.completed) return { cls: "", text: "Final" + (g.overtime ? " (OT)" : "") };
+    if (g.period > 0) {
+      const q = ["", "1st", "2nd", "3rd", "4th"][g.period] || "OT";
+      return { cls: "live", text: `${q} · ${g.clock || ""}` };
+    }
+    const k = new Date(g.kickoff);
+    return {
+      cls: "",
+      text: k.toLocaleDateString([], { weekday: "short" }) + " " +
+        k.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    };
+  }
+
+  /* ---------- Matchups: every game, owner vs owner ---------- */
+  function renderMatchups() {
     const marks = results[viewWeek] || {};
+    const seen = new Set();
+    const games = [];
+    for (const [team, g] of Object.entries(marks)) {
+      const key = [team, g.opponent].sort().join("-");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const away = g.home ? g.opponent : team;
+      const home = g.home ? team : g.opponent;
+      if (!marks[away] || !marks[home]) continue;
+      games.push({ away, home, a: marks[away], h: marks[home] });
+    }
+    games.sort((x, y) => new Date(x.a.kickoff) - new Date(y.a.kickoff));
 
-    let html = `
-    <div class="tabs">
-      ${Object.keys(ROSTERS).map(owner => `
-        <button 
-          class="tab ${owner === selectedOwner ? "active" : ""}"
-          onclick="selectOwner('${owner}')">
-          ${owner}
-        </button>
-      `).join("")}
-    </div>
-  `;
+    if (!games.length) { document.getElementById("matchups").innerHTML = ""; return; }
 
-    const teams = ROSTERS[selectedOwner];
+    let html = "";
+    let lastDay = "";
+    for (const { away, home, a, h } of games) {
+      const k = new Date(a.kickoff);
+      const day = k.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
+      if (day !== lastDay) { html += `<div class="day">${day}</div>`; lastDay = day; }
 
-    for (const team of teams) {
-      const game = marks[team];
-      if (!game) continue;
+      const started = a.completed || a.period > 0;
+      const st = statusText(a);
+      const oa = OWNER[away], oh = OWNER[home];
+      const same = oa && oa === oh;
 
-      const opponent = game.opponent;
-      const opponentOwner = OWNER[opponent];
+      const side = (team, g, owner) => {
+        const c = teamColor(team);
+        const cls = !g.completed ? "" : g.res === "W" ? "won" : g.res === "L" ? "lost" : "";
+        return `
+          <div class="side ${cls}" style="--tc:${c};--tx:${textOn(c)}">
+            <div class="logo-wrap"><img src="${g.logo}" alt="" loading="lazy"></div>
+            <div class="abbr">${team}</div>
+            <div class="nick">${teamName(team)}</div>
+            <div class="rec">${g.record || "&nbsp;"}</div>
+            ${started ? `<div class="score">${g.teamScore}</div>` : ""}
+            ${ownerChip(owner)}
+          </div>`;
+      };
 
-      const teamName = TEAMS[team][0];
-      const opponentName = TEAMS[opponent][0];
-
-      let status = "";
-      let result = "";
-
-      if (game.completed) {
-        status = `
-        Final<br>
-        ${game.teamScore}-${game.oppScore}
-      `;
-
-        result =
-          game.res === "W" ? "✅ Win" :
-            game.res === "L" ? "❌ Loss" :
-              "➖ Tie";
-
-        if (game.overtime) {
-          status += `<br><span class="ot">Overtime</span>`;
+      // Points earned (finished games only)
+      let earned = "";
+      if (a.completed) {
+        if (a.res === "T") {
+          earned = `${oa} +0.5 · ${oh} +0.5`;
+        } else {
+          const w = a.res === "W" ? away : home;
+          const wg = a.res === "W" ? a : h;
+          earned = `${OWNER[w]} +${fmt(1 + (wg.bonus?.length || 0))}`;
         }
-
-      } else if (game.period > 0) {
-
-        const quarter =
-          game.period === 1 ? "1st" :
-            game.period === 2 ? "2nd" :
-              game.period === 3 ? "3rd" :
-                game.period === 4 ? "4th" :
-                  "OT";
-
-        status = `
-    ${game.teamScore}-${game.oppScore}<br>
-    ${quarter} · ${game.clock || ""}
-  `;
-
-      } else {
-        const kickoff = new Date(game.kickoff);
-
-        status =
-          kickoff.toLocaleDateString([], { weekday: "long" }) +
-          " " +
-          kickoff.toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit"
-          });
       }
+      const bonusBadges = [...new Set([...(a.bonus || []), ...(h.bonus || [])])]
+        .map(b => `<span class="badge">${b} bonus</span>`).join("");
 
       html += `
-      <div class="game-card">
-
-        <div class="game-header">
-          <img class="game-logo" src="${game.logo}" alt="${team}">
-          <div class="game-teams">
-            ${teamName} (${team}) (${game.record})
-            ${game.home ? "vs" : "@"} </br>
-            ${opponentName} (${opponent}) (${game.opponentRecord})
+        <div class="match ${a.completed ? "done" : ""}">
+          <div class="sides">
+            ${side(away, a, oa)}
+            ${side(home, h, oh)}
+            <div class="at">@</div>
           </div>
-        </div>
-
-        <div class="game-owner">
-          Opponent Owner: ${opponentOwner}
-        </div>
-
-        <div class="game-time">
-          ${status}
-        </div>
-
-        ${game.broadcast ? `
-          <div class="game-owner">
-              TV: ${game.broadcast}
+          <div class="foot">
+            <span class="status ${st.cls}">${st.text}</span>
+            ${a.broadcast ? `<span class="tv">${a.broadcast}</span>` : ""}
+            ${bonusBadges}
+            ${same ? `<span class="badge same">Same owner: ${oa} gets a point</span>` : ""}
+            ${earned && !same ? `<span class="earned">${earned}</span>` : ""}
           </div>
-          ` : ""}
-
-        ${result ? `
-          <div class="game-result">
-            ${result}
-          </div>
-        ` : ""}
-
-      </div>
-    `;
+        </div>`;
     }
+    document.getElementById("matchups").innerHTML = html;
+  }
 
+  /* ---------- Team by team (per person) ---------- */
+  function renderWeekGames() {
+    const marks = results[viewWeek] || {};
+    const oc = OWNER_COLOR[selectedOwner];
+
+    let html = `<div class="tabs" role="tablist">
+      ${Object.keys(ROSTERS).map(owner => `
+        <button class="tab ${owner === selectedOwner ? "active" : ""}" role="tab"
+          aria-selected="${owner === selectedOwner}" data-owner="${owner}"
+          style="--oc:${OWNER_COLOR[owner]};--tx:${textOn(OWNER_COLOR[owner])}">${owner}</button>`).join("")}
+    </div>`;
+
+    for (const team of ROSTERS[selectedOwner]) {
+      const g = marks[team];
+      if (!g) continue;
+      const c = teamColor(team);
+      const st = statusText(g);
+      const started = g.completed || g.period > 0;
+      const oppOwner = OWNER[g.opponent];
+
+      let right;
+      if (g.completed) right = `<div class="pill ${g.res}">${g.res}</div>`;
+      else if (started) right = `<div class="pill score-live">${g.teamScore}-${g.oppScore}</div>`;
+      else right = `<div class="pill"> </div>`;
+
+      const finalScore = g.completed ? ` · ${g.teamScore}-${g.oppScore}` : "";
+      const bonusText = g.bonus?.length ? ` · +${g.bonus.length} bonus (${g.bonus.join(", ")})` : "";
+
+      html += `
+        <div class="game-card ${g.res === "L" ? "lost" : ""}" style="--tc:${c};--tx:${textOn(c)}">
+          <img class="game-logo" src="${g.logo}" alt="" loading="lazy">
+          <div class="game-body">
+            <div class="game-teams">${team} ${g.home ? "vs" : "@"} ${g.opponent}
+              <span>${teamName(team)} ${g.home ? "vs" : "@"} ${teamName(g.opponent)}</span></div>
+            <div class="game-meta">
+              <span>Playing ${ownerChip(oppOwner) || "no one"}</span>
+              <span class="${st.cls}">${st.text}${finalScore}${bonusText}</span>
+              ${g.broadcast && !g.completed ? `<span>${g.broadcast}</span>` : ""}
+            </div>
+          </div>
+          ${right}
+        </div>`;
+    }
     document.getElementById("week").innerHTML = html;
   }
 
-
-  function selectOwner(owner) {
-    selectedOwner = owner;
+  document.getElementById("week").addEventListener("click", e => {
+    const btn = e.target.closest(".tab");
+    if (!btn) return;
+    selectedOwner = btn.dataset.owner;
+    try { localStorage.setItem("nflPoolOwner", selectedOwner); } catch (err) { }
     renderWeekGames();
-  }
-  const fmt = n => n % 1 ? n.toFixed(1) : String(n);
+  });
 
+  /* ---------- Main render ---------- */
   function render() {
     const rows = tally();
     const bestScore = Math.max(...rows.map(r => r.weekPts));
-    const winners = rows.filter(r => r.weekPts === bestScore);
     const max = Math.max(1, ...rows.map(r => r.points));
-    const weeklyRows = [...rows].sort((a, b) => b.weekPts - a.weekPts);
+    const weeklyRows = [...rows].sort((a, b) => b.weekPts - a.weekPts || a.name.localeCompare(b.name));
 
-    if (bestScore === 0) {
-      document.getElementById("weeklyWinner").innerHTML =
-        `<div class="winner">No games completed.</div>`;
-    } else {
-      document.getElementById("weeklyWinner").innerHTML =
-        weeklyRows.map((r, i) => `
-            <div class="row">
-                <span class="rank">${i + 1}</span>
-                <div class="main">
-                    <div class="top">
-                        <span class="who">${r.name}</span>
-                        <span class="pts">${fmt(r.weekPts)}</span>
-                    </div>
-                </div>
-            </div>
-        `).join("");
-    }
+    // Season standings
     document.getElementById("standings").innerHTML = rows.map((r, i) => `
-    <div class="row">
-      <span class="rank">${i + 1}</span>
-      <div class="main">
-        <div class="top"><span class="who">${r.name}</span><span class="pts">${fmt(r.points)}</span></div>
-        <div class="track"><div class="fill" style="width:${(r.points / max) * 100}%"></div></div>
-        <div class="wk">${r.wins} wins${r.ties ? ` · ${r.ties} ties` : ""}${r.bonuses ? ` · ${r.bonuses} bonus` : ""} · ${fmt(r.weekPts)} this week</div>
-      </div>
-    </div>`).join("");
-    document.getElementById("weeklabel").textContent = "Week " + viewWeek;
-    const range = weekRanges[viewWeek];
+      <div class="row ${i === 0 && r.points > 0 ? "first" : ""}" style="--oc:${OWNER_COLOR[r.name]}">
+        <span class="rank">${i + 1}</span>
+        <div class="main">
+          <div class="top"><span class="who">${r.name}</span><span class="pts">${fmt(r.points)}</span></div>
+          <div class="track"><div class="fill" style="width:${(r.points / max) * 100}%"></div></div>
+          <div class="wk">${r.wins} wins${r.ties ? ` · ${r.ties} ties` : ""}${r.bonuses ? ` · ${r.bonuses} bonus` : ""} · ${fmt(r.weekPts)} this week</div>
+        </div>
+      </div>`).join("");
 
-    if (range?.firstDate) {
-      const start = range.firstDate.toLocaleDateString([], {
-        month: "short",
-        day: "numeric"
-      });
-
-      const end = range.lastDate.toLocaleDateString([], {
-        month: "short",
-        day: "numeric"
-      });
-
-      document.getElementById("weeklabel").textContent =
-        `Week ${viewWeek} (${start} – ${end})`;
+    // Week leaderboard
+    if (bestScore === 0) {
+      document.getElementById("weeklyWinner").innerHTML = `<div class="msg">No games completed yet this week.</div>`;
+    } else {
+      document.getElementById("weeklyWinner").innerHTML = weeklyRows.map((r, i) => `
+        <div class="row compact ${r.weekPts === bestScore ? "first" : ""}" style="--oc:${OWNER_COLOR[r.name]}">
+          <span class="rank">${i + 1}</span>
+          <div class="top"><span class="who">${r.name}</span><span class="pts">${fmt(r.weekPts)}</span></div>
+        </div>`).join("");
     }
-    document.getElementById("weekhead").textContent = "Week " + viewWeek + " results";
 
+    // Week label in the sticky bar
+    const range = weekRanges[viewWeek];
+    let dates = "";
+    if (range?.firstDate) {
+      const f = d => d.toLocaleDateString([], { month: "short", day: "numeric" });
+      dates = `<small>${f(range.firstDate)} – ${f(range.lastDate)}</small>`;
+    }
+    document.getElementById("weeklabel").innerHTML = `Week ${viewWeek}${dates}`;
+    document.getElementById("weeksub").textContent = `Week ${viewWeek} points`;
+    document.getElementById("weekhead").textContent = `Week ${viewWeek} team by team`;
+    document.getElementById("prev").disabled = viewWeek <= 1;
+    document.getElementById("next").disabled = viewWeek >= 18;
+
+    renderMatchups();
     renderWeekGames();
 
     const games = Object.values(results[viewWeek] || {}).length;
-    if (!games)
-      setMsg(`No NFL games scheduled for Week ${viewWeek}.`);
-    else
-      setMsg("");
+    setMsg(games ? "" : `No NFL games scheduled for Week ${viewWeek}.`);
   }
 
   function setMsg(t) {
     document.getElementById("msg").innerHTML = t ? `<div class="msg">${t}</div>` : "";
   }
+
+  // Owner color legend in the header
+  document.getElementById("legend").innerHTML =
+    Object.keys(ROSTERS).map(ownerChip).join("");
 
   document.getElementById("prev").onclick = () => { if (viewWeek > 1) { viewWeek--; render(); } };
   document.getElementById("next").onclick = async () => {
@@ -745,3 +771,5 @@
   document.getElementById("refresh").onclick = loadAll;
   loadAll();
 </script>
+</body>
+</html>
