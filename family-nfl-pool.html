@@ -359,7 +359,7 @@
 <header class="hero">
   <div class="wrap">
     <h1>Family NFL Pool</h1>
-    <p class="tagline">Eight teams each. A win is a point, a tie is half. Shutouts and overtime wins are worth a bonus point each.</p>
+    <p class="tagline">Eight teams each. A win is a point, a tie is half. Shutouts, blowouts and overtime wins are worth a bonus point each.</p>
     <div class="legend" id="legend"></div>
   </div>
 </header>
@@ -386,14 +386,14 @@
   <p class="sub" id="weeksub">This week</p>
   <div id="weeklyWinner"></div>
 
-  <h2>Matchups</h2>
-  <p class="sub">Every game, with whose team is on each side</p>
-  <div id="matchups"></div>
-
   <h2 id="weekhead">Team by team</h2>
   <p class="sub">Pick a person to see just their eight teams</p>
   <div id="week"></div>
-
+  
+  <h2>Matchups</h2>
+  <p class="sub">Every game, with whose team is on each side</p>
+  <div id="matchups"></div>
+  
   <p class="muted small" id="stamp"></p>
 </main>
 
@@ -490,6 +490,7 @@
             res = "W";
             if (oppScore === 0) bonus.push("Shutout");
             if (ot) bonus.push("OT");
+            if (oppScore < (teamScore / 2 - 7)) bonus.push("Blowout");
           } else if (teamScore < oppScore) {
             res = "L";
           } else {
