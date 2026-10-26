@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Football Scoreboard</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:700px;margin:20px auto;background:#f4f4f4}
+.card{background:#fff;padding:16px;border-radius:8px;margin-bottom:12px}
+button{padding:10px 14px;margin:4px}
+h1,h2{text-align:center}
+.score{display:flex;justify-content:space-around;font-size:28px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#log{max-height:220px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Football Scoreboard</h1>
+<div class="score">
+<div>Home<br><span id="home">0</span></div>
+<div>Away<br><span id="away">0</span></div>
+</div>
+<div class="info">
+<div>Half: <span id="half">1st</span></div>
+<div>Possession: <span id="pos">Home</span></div>
+<div>Ball On: <span id="ball">40</span></div>
+<div>Down: <span id="down">1</span></div>
+<div>To Gain: <span id="gain">20</span></div>
+</div>
+</div>
+
+<div class="card">
+<button onclick="yards(true)">Gain</button>
+<button onclick="yards(false)">Loss</button>
+<button onclick="touchdown()">Touchdown</button>
+<button onclick="turnover()">Turnover</button>
+<hr>
+<button onclick="undo()">Undo</button>
+<button onclick="changeHalf()">Change Half</button>
+<button onclick="changePoss()">Change Possession</button>
+<button onclick="editScore()">Edit Score</button>
+<button onclick="resetGame()">Reset</button>
+</div>
+
+<div class="card">
+<h2>Play Log</h2>
+<div id="log"></div>
+</div>
+
+<script>
+let s;
+function init(){
+s={half:1,pos:"Home",home:0,away:0,ball:40,down:1,marker:20,log:[],hist:[]};
+render();
+}
+function save(){s.hist.push(JSON.stringify({...s,hist:[]}));}
+function render(){
+ball.textContent=s.ball;
+down.textContent=s.down;
+gain.textContent=Math.max(s.ball-s.marker,0);
+half.textContent=s.half===1?"1st":"2nd";
+pos.textContent=s.pos;
+home.textContent=s.home;
+away.textContent=s.away;
+log.innerHTML=s.log.slice().reverse().map(x=>"• "+x).join("<br>");
+}
+function firstDownCheck(){
+if(s.ball<=s.marker && s.ball>0){
+s.log.push(s.pos+" First Down");
+s.down=1;
+s.marker=Math.max(s.ball-20,0);
+}
+}
+function yards(g){
+let y=parseInt(prompt("Yards?"));
+if(isNaN(y))return;
+save();
+s.ball+=g?-y:y;
+if(s.ball<0)s.ball=0;
+if(s.ball>40)s.ball=40;
+s.down++;
+s.log.push(`${s.pos} ${g?"Gain":"Loss"} ${y}`);
+firstDownCheck();
+render();
+}
+function touchdown(){
+save();
+if(s.pos==="Home")s.home+=6; else s.away+=6;
+let xp=prompt("Extra points? (0,1,2)","1");
+xp=parseInt(xp); if(![0,1,2].includes(xp))xp=0;
+if(s.pos==="Home")s.home+=xp; else s.away+=xp;
+s.log.push(`${s.pos} TD (+${xp})`);
+turnover(false);
+}
+function turnover(saveState=true){
+if(saveState)save();
+s.pos=s.pos==="Home"?"Away":"Home";
+s.ball=40;s.down=1;s.marker=20;
+s.log.push("Turnover");
+render();
+}
+function undo(){
+if(!s.hist.length)return;
+let prev=JSON.parse(s.hist.pop()); prev.hist=s.hist; s=prev; render();
+}
+function changeHalf(){s.half=s.half===1?2:1;render();}
+function changePoss(){turnover(false);}
+function editScore(){
+let h=prompt("Home score",s.home);let a=prompt("Away score",s.away);
+if(h!==null)s.home=parseInt(h)||0;if(a!==null)s.away=parseInt(a)||0;render();
+}
+function resetGame(){if(confirm("Reset?"))init();}
+init();
+</script>
+</body></html>
