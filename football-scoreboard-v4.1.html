@@ -1,0 +1,38 @@
+
+<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{margin:0;font-family:Arial;background:#16324a;color:#fff}.w{max-width:420px;margin:auto;padding:12px}
+.card{background:#25506f;padding:12px;border-radius:12px;margin:10px 0}.teams{display:flex;justify-content:space-between;text-align:center}.score{font-size:42px;font-weight:bold}.poss{color:gold;height:24px}.field{height:24px;background:#2f7d32;border-radius:8px;position:relative}.ball,.fd{position:absolute;top:2px}.ball{transform:translateX(-50%)}.fd{width:2px;background:yellow;height:20px}.row{display:flex;gap:8px}.row button{flex:1}button{padding:15px;font-size:20px;border-radius:10px;border:0;margin:5px 0}#log{max-height:160px;overflow:auto}#overlay{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center}#box{background:#fff;color:#000;padding:15px;border-radius:10px;width:300px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+</style></head><body><div class=w>
+<div class=card><div id=half>1st Half</div><div class=teams><div><div id=hp class=poss>🏈</div>HOME<div id=hs class=score>0</div></div><div><div id=ap class=poss></div>AWAY<div id=as class=score>0</div></div></div>
+<div class=field><div id=fd class=fd></div><div id=fb class=ball>🏈</div></div>
+<div id=info style="text-align:center;font-size:28px"></div></div>
+<div class=row><button onclick="pad('gain')">Gain</button><button onclick="pad('loss')">Loss</button></div>
+<div class=row><button onclick="td()">Touchdown</button><button onclick="turn()">Turnover</button></div>
+<div class=row><button onclick="undo()">Undo</button><button onclick="halfchg()">Half</button><button onclick="newGame()">New Game</button></div>
+<div class=card id=log></div></div>
+<div id=overlay><div id=box></div></div>
+<script>
+let s={half:1,pos:'HOME',hs:0,as:0,ball:40,down:1,marker:20,log:[],hist:[]},mode='',val='';
+const ord=n=>['1st','2nd','3rd','4th'][n-1]||n+'th';
+function save(){s.hist.push(JSON.stringify({...s,hist:[]}))}
+function render(){half.textContent=(s.half==1?'1st':'2nd')+' Half';hp.textContent=s.pos=='HOME'?'🏈':'';ap.textContent=s.pos=='AWAY'?'🏈':'';hs.textContent=s.hs;as.textContent=s.as;info.textContent=`Ball ${s.ball} • ${ord(s.down)} & ${Math.max(s.ball-s.marker,0)}`;fb.style.left=(100-s.ball*2.5)+'%';fd.style.left=(100-s.marker*2.5)+'%';log.innerHTML=s.log.slice().reverse().map(x=>'• '+x).join('<br>')}
+function modal(html){box.innerHTML=html;overlay.style.display='flex'}
+function closeM(){overlay.style.display='none'}
+function pad(m){mode=m;val='';let h='<h3>'+m.toUpperCase()+' YARDS</h3><div id=d style="border:1px solid #999;padding:8px;font-size:28px;text-align:right">0</div><div class=grid>';
+['1','2','3','4','5','6','7','8','9','0','⌫'].forEach(k=>h+=`<button onclick="key('${k}')">${k}</button>`);h+='</div><button onclick="apply()">OK</button><button onclick="closeM()">Cancel</button>';modal(h)}
+function key(k){if(k=='⌫')val=val.slice(0,-1);else val+=k;d.textContent=val||0}
+function apply(){let y=parseInt(val);if(isNaN(y))return;closeM();save();s.ball+=mode=='gain'?-y:y;s.ball=Math.max(0,Math.min(40,s.ball));s.down++;s.log.push(`${s.pos} ${mode} ${y}`);if(s.ball<=s.marker&&s.ball>0){s.down=1;s.marker=Math.max(s.ball-20,0);s.log.push('First Down')}render()}
+function td(){save();if(s.pos=='HOME')s.hs+=6;else s.as+=6;modal('<h2>🏈 Touchdown!</h2><p>Extra Points?</p><button onclick="xp(0)">0</button><button onclick="xp(1)">1</button><button onclick="xp(2)">2</button>')}
+function xp(v){if(s.pos=='HOME')s.hs+=v;else s.as+=v;s.log.push(`${s.pos} TD (+${v})`);closeM();turn(false)}
+function turn(sv=true){if(sv)save();s.pos=s.pos=='HOME'?'AWAY':'HOME';s.ball=40;s.down=1;s.marker=20;s.log.push('Turnover');render()}
+function undo(){if(!s.hist.length)return;let p=JSON.parse(s.hist.pop());p.hist=s.hist;s=p;render()}
+function halfchg(){s.half=s.half==1?2:1;render()}
+function newGame(){
+ if(confirm('Start a new game? This will reset everything.')){
+  s={half:1,pos:'HOME',hs:0,as:0,ball:40,down:1,marker:20,log:[],hist:[]};
+  closeM();render();
+ }
+}
+render();
+</script></body></html>

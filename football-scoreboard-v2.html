@@ -1,0 +1,38 @@
+
+<!doctype html><html><head><meta name=viewport content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Arial;margin:0;background:#1b1b1b;color:#fff}
+.wrap{max-width:420px;margin:auto;padding:14px}
+.card{background:#2a2a2a;border-radius:14px;padding:16px;margin-bottom:12px}
+.score{font-size:56px;font-weight:bold;text-align:center}
+.small{text-align:center;font-size:22px}
+.info{font-size:34px;text-align:center;margin:10px 0}
+button{width:100%;padding:18px;font-size:24px;margin:6px 0;border-radius:10px;border:0}
+#log{max-height:180px;overflow:auto;font-size:18px}
+#modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center}
+.box{background:#fff;color:#000;padding:20px;border-radius:12px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.grid button{width:auto}
+</style></head><body><div class=wrap>
+<div class=card><div class=small id=half>1st Half</div><div class=small id=pos>🏈 HOME</div>
+<div class=score><span id=hs>0</span> - <span id=as>0</span></div>
+<div class=small>HOME &nbsp;&nbsp;&nbsp; AWAY</div>
+<div class=info id=ball>Ball:40</div><div class=info id=dd>1st & 20</div></div>
+<button onclick="openY(true)">➕ Gain</button>
+<button onclick="openY(false)">➖ Loss</button>
+<button onclick="td()">🏈 Touchdown</button>
+<button onclick="to()">🔄 Turnover</button>
+<div class=card><button onclick="undo()">Undo</button><button onclick="halfchg()">Change Half</button><div id=log></div></div>
+</div>
+<div id=modal><div class=box><h3 id=mt></h3><div class=grid id=g></div><button onclick="modal.style.display='none'">Cancel</button></div></div>
+<script>
+let s={half:1,pos:"HOME",hs:0,as:0,ball:40,down:1,marker:20,log:[],hist:[]},gain=true;
+function snap(){s.hist.push(JSON.stringify({...s,hist:[]}))}
+function r(){half.innerText=(s.half==1?"1st":"2nd")+" Half";pos.innerText="🏈 "+s.pos;hs.innerText=s.hs;as.innerText=s.as;ball.innerText="Ball: "+s.ball;dd.innerText=s.down+" & "+Math.max(s.ball-s.marker,0);log.innerHTML=s.log.slice().reverse().map(x=>"• "+x).join("<br>")}
+function openY(gn){gain=gn;mt.innerText=gn?"Gain":"Loss";g.innerHTML="";for(let i=1;i<=15;i++){let b=document.createElement("button");b.textContent=i;b.onclick=()=>yards(i);g.appendChild(b)};modal.style.display="flex"}
+function yards(y){modal.style.display="none";snap();s.ball+=gain?-y:y;if(s.ball<0)s.ball=0;if(s.ball>40)s.ball=40;s.down++;s.log.push(`${s.pos} ${gain?"Gain":"Loss"} ${y}`);if(s.ball<=s.marker&&s.ball>0){s.down=1;s.marker=Math.max(s.ball-20,0);s.log.push("First Down")}r()}
+function td(){snap();if(s.pos=="HOME")s.hs+=6;else s.as+=6;let x=prompt("XP (0,1,2)","1");x=parseInt(x);if(![0,1,2].includes(x))x=0;if(s.pos=="HOME")s.hs+=x;else s.as+=x;to(false)}
+function to(save=true){if(save)snap();s.pos=s.pos=="HOME"?"AWAY":"HOME";s.ball=40;s.down=1;s.marker=20;s.log.push("Turnover");r()}
+function undo(){if(!s.hist.length)return;let p=JSON.parse(s.hist.pop());p.hist=s.hist;s=p;r()}
+function halfchg(){s.half=s.half==1?2:1;r()}r();
+</script></body></html>

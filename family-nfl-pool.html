@@ -490,7 +490,7 @@
             res = "W";
             if (oppScore === 0) bonus.push("Shutout");
             if (ot) bonus.push("OT");
-            if (oppScore < (teamScore / 2 - 7)) bonus.push("Blowout");
+            if (oppScore <= (teamScore / 2 - 7)) bonus.push("Blowout");
           } else if (teamScore < oppScore) {
             res = "L";
           } else {
